@@ -3,64 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance AI - Final Fix</title>
+    <title>Finance AI - Stable Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #020617; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: #1e293b; border-radius: 16px; padding: 2rem; border: 1px solid #334155; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        body { background-color: #020617; color: white; font-family: system-ui, -apple-system, sans-serif; }
+        .card { background: #1e293b; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     </style>
 </head>
-<body>
-    <div class="card">
-        <h1 class="text-2xl font-bold mb-6 text-center text-blue-400">מנתח פיננסי PRO</h1>
-        <textarea id="articleInput" class="w-full h-48 bg-slate-900 border border-slate-700 p-4 rounded-xl mb-4 text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none" placeholder="הדבק כאן את הכתבה..."></textarea>
-        <button onclick="runAnalysis()" id="btn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all flex justify-center items-center gap-2">
-            <span>נתח כתבה</span>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="card w-full max-w-2xl p-6 md:p-8">
+        <h1 class="text-2xl font-bold mb-6 text-blue-400 flex items-center gap-2">
+            <span>🚀</span> מנתח פיננסי PRO
+        </h1>
+        
+        <textarea id="articleInput" 
+            class="w-full h-64 bg-slate-900 border border-slate-700 p-4 rounded-xl mb-4 text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-all" 
+            placeholder="הדבק כאן את הכתבה הפיננסית לניתוח..."></textarea>
+        
+        <button onclick="runAnalysis()" id="btn" 
+            class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 py-4 rounded-xl font-bold transition-all flex justify-center items-center gap-3">
+            <span id="btnText">נתח כתבה עכשיו</span>
             <div id="loader" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
         </button>
-        <div id="output" class="mt-6 p-4 bg-slate-900/50 rounded-lg text-sm leading-relaxed text-slate-300 hidden"></div>
+
+        <div id="outputContainer" class="mt-6 hidden">
+            <h3 class="text-sm font-semibold text-slate-400 mb-2 uppercase tracking-wider">תוצאת הניתוח:</h3>
+            <div id="output" class="p-4 bg-slate-900/80 rounded-lg text-sm leading-relaxed text-slate-200 border border-slate-700 whitespace-pre-wrap"></div>
+        </div>
     </div>
 
     <script>
         async function runAnalysis() {
-            const input = document.getElementById('articleInput').value;
+            const input = document.getElementById('articleInput').value.trim();
             const output = document.getElementById('output');
+            const container = document.getElementById('outputContainer');
             const loader = document.getElementById('loader');
             const btn = document.getElementById('btn');
+            const btnText = document.getElementById('btnText');
             
-            if (!input) return alert("אנא הדבק טקסט");
+            if (!input) {
+                alert("בבקשה תדביק טקסט כלשהו לניתוח.");
+                return;
+            }
 
-            // המפתח שלך
+            // הגדרות API
             const API_KEY = "AIzaSyBkcasv0YHYBMV319ZK1j2HbWMEbHOIi_o"; 
-            // הכתובת המדויקת שמונעת 404
+            // כתובת ה-V1 היציבה (מונעת 404)
             const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
+            // מצב טעינה
             btn.disabled = true;
+            btnText.innerText = "מעבד נתונים...";
             loader.classList.remove('hidden');
-            output.classList.remove('hidden');
-            output.innerText = "מנתח נתונים...";
+            container.classList.remove('hidden');
+            output.innerText = "מתקשר עם השרת של Google AI...";
 
             try {
                 const response = await fetch(URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: "נתח את הכתבה הפיננסית הבאה ותן סיכום מנהלים בעברית: " + input }] }]
+                        contents: [{ 
+                            parts: [{ text: "נתח את הטקסט הבא בעברית. תן סיכום קצר, נקודות מפתח ושורה תחתונה למשקיע: " + input }] 
+                        }]
                     })
                 });
 
                 const data = await response.json();
 
-                if (data.error) {
-                    output.innerHTML = `<span class="text-red-400">שגיאה מגוגל: ${data.error.message}</span>`;
-                } else {
-                    const result = data.candidates[0].content.parts[0].text;
-                    output.innerText = result;
+                if (!response.ok) {
+                    // אם גוגל החזירה שגיאה (כמו 400 או 403)
+                    throw new Error(data.error?.message || "שגיאה לא ידועה בשרת");
                 }
+
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    output.innerText = data.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error("גוגל לא החזירה תשובה תקינה.");
+                }
+
             } catch (err) {
-                output.innerHTML = `<span class="text-red-400">שגיאת רשת. וודא שאין חוסם פרסומות פעיל.</span>`;
+                output.innerHTML = `<b class="text-red-400">⚠️ שגיאה:</b><br>${err.message}`;
+                console.error("Full Error:", err);
             } finally {
                 btn.disabled = false;
+                btnText.innerText = "נתח כתבה עכשיו";
                 loader.classList.add('hidden');
             }
         }
