@@ -3,59 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance AI - Stable v1</title>
+    <title>מנתח פיננסי PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #020617; color: white; font-family: system-ui, sans-serif; }
+        .card { background: #1e293b; border-radius: 16px; border: 1px solid #334155; }
+        .loader { width: 20px; height: 20px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4">
-    <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 w-full max-w-xl shadow-2xl text-right">
-        <h1 class="text-2xl font-bold text-blue-400 mb-6">מנתח פיננסי PRO</h1>
-        <textarea id="articleInput" class="w-full h-48 bg-black border border-slate-700 p-4 rounded-xl mb-4 text-white outline-none focus:border-blue-500" placeholder="הדבק כאן את הכתבה הפיננסית..."></textarea>
-        <button onclick="run()" id="btn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all flex justify-center items-center gap-2">
-            <span id="btnText">נתח עכשיו</span>
+<body class="min-h-screen flex items-center justify-center p-6 text-right">
+    <div class="card w-full max-w-2xl p-8">
+        <h1 class="text-2xl font-bold mb-6 text-blue-400">מנתח פיננסי PRO</h1>
+        
+        <textarea id="articleInput" class="w-full h-64 bg-slate-900 border border-slate-700 p-4 rounded-xl mb-4 text-white outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="הדבק כאן את הכתבה הפיננסית..."></textarea>
+        
+        <button onclick="runAnalysis()" id="btn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold flex justify-center items-center gap-3 transition-all">
+            <span id="btnText">נתח כתבה עכשיו</span>
+            <div id="loader" class="loader"></div>
         </button>
-        <div id="out" class="mt-6 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap border-t border-slate-800 pt-4"></div>
+
+        <div id="outputContainer" class="mt-6 hidden border-t border-slate-700 pt-6">
+            <h3 class="text-sm font-bold text-slate-400 mb-2 uppercase italic">תוצאת הניתוח:</h3>
+            <div id="output" class="text-sm leading-relaxed text-slate-200 whitespace-pre-wrap"></div>
+        </div>
     </div>
 
     <script>
-        async function run() {
-            const out = document.getElementById('out');
-            const btnText = document.getElementById('btnText');
+        async function runAnalysis() {
+            const input = document.getElementById('articleInput').value.trim();
+            const output = document.getElementById('output');
+            const container = document.getElementById('outputContainer');
+            const loader = document.getElementById('loader');
             const btn = document.getElementById('btn');
-            const txt = document.getElementById('articleInput').value;
             
-            if(!txt) return alert("נא להזין טקסט");
+            if (!input) return alert("בבקשה תדביק טקסט כלשהו.");
+
+            // המפתח שלך והכתובת היציבה (v1)
+            const API_KEY = "AIzaSyBkcasv0YHYBMV319ZK1j2HbWMEbHOIi_o"; 
+            const URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
             btn.disabled = true;
-            btnText.innerText = "מעבד נתונים...";
-            out.innerText = "מתחבר ל-API היציב (v1)...";
-
-            const key = "AIzaSyBkcasv0YHYBMV319ZK1j2HbWMEbHOIi_o";
-            
-            // עדכון לפי המלצות ה-API היציב: שימוש ב-v1 ושם מודל מפורש
-            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
+            loader.style.display = 'block';
+            container.classList.remove('hidden');
+            output.innerText = "מתקשר עם שרתי ה-AI של גוגל...";
 
             try {
-                const res = await fetch(url, {
+                const response = await fetch(URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: "נתח את הטקסט הפיננסי הבא בעברית ותן סיכום מנהלים: " + txt }] }]
+                        contents: [{ parts: [{ text: "נתח את הטקסט הפיננסי הבא בעברית. תן סיכום מנהלים קצר, נקודות מפתח ושורה תחתונה למשקיע: " + input }] }]
                     })
                 });
 
-                const data = await res.json();
-                
+                const data = await response.json();
+
                 if (data.error) {
-                    // הצגת השגיאה המפורשת מגוגל לאבחון
-                    out.innerHTML = `<span class="text-red-500 font-bold">שגיאה:</span><br>${data.error.message}`;
-                } else if (data.candidates) {
-                    out.innerText = data.candidates[0].content.parts[0].text;
+                    output.innerHTML = `<span class="text-red-400">שגיאה מגוגל: ${data.error.message}</span>`;
+                } else if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    output.innerText = data.candidates[0].content.parts[0].text;
+                } else {
+                    output.innerText = "לא התקבלה תשובה תקינה. נסה שוב.";
                 }
-            } catch (e) {
-                out.innerText = "שגיאת חיבור. וודא שאין חוסם פרסומות.";
+            } catch (err) {
+                output.innerText = "שגיאת רשת. וודא שאין חוסם פרסומות פעיל.";
             } finally {
                 btn.disabled = false;
-                btnText.innerText = "נתח עכשיו";
+                loader.style.display = 'none';
             }
         }
     </script>
