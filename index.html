@@ -3,53 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance AI - Final Fix</title>
+    <title>Finance AI PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4 text-right">
-    <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 w-full max-w-xl shadow-2xl">
-        <h1 class="text-2xl font-bold text-blue-400 mb-6">מנתח פיננסי PRO</h1>
-        <textarea id="articleInput" class="w-full h-48 bg-black border border-slate-700 p-4 rounded-xl mb-4 text-white outline-none focus:border-blue-500" placeholder="הדבק כתבה כאן..."></textarea>
-        <button onclick="run()" id="btn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all">נתח עכשיו</button>
-        <div id="out" class="mt-6 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap"></div>
+<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4">
+    <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 w-full max-w-xl shadow-2xl text-right">
+        <h1 class="text-2xl font-bold text-blue-400 mb-6 font-sans">מנתח פיננסי PRO</h1>
+        <textarea id="articleInput" class="w-full h-48 bg-black border border-slate-700 p-4 rounded-xl mb-4 text-white outline-none focus:border-blue-500" placeholder="הדבק כאן את הכתבה הפיננסית..."></textarea>
+        <button onclick="run()" id="btn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all flex justify-center items-center gap-2">
+            <span id="btnText">נתח עכשיו</span>
+        </button>
+        <div id="out" class="mt-6 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap border-t border-slate-800 pt-4"></div>
     </div>
 
     <script>
         async function run() {
             const out = document.getElementById('out');
+            const btnText = document.getElementById('btnText');
             const btn = document.getElementById('btn');
             const txt = document.getElementById('articleInput').value;
+            
             if(!txt) return alert("נא להזין טקסט");
 
             btn.disabled = true;
-            out.innerText = "מעבד נתונים... (זה לוקח כמה שניות)";
+            btnText.innerText = "מעבד נתונים...";
+            out.innerText = "מתחבר לשרתי הבינה המלאכותית...";
 
-            // המפתח שלך
             const key = "AIzaSyBkcasv0YHYBMV319ZK1j2HbWMEbHOIi_o";
             
-            // שים לב: שינינו ל-v1 וסידרנו את שם המודל לפורמט הכי עדכני
-            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
+            // שינוי לפורמט ה-URL הכי תואם שיש כרגע (v1beta עם סיומת -latest)
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
 
             try {
                 const res = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: "נתח את הטקסט הפיננסי הבא בעברית ותן סיכום מנהלים: " + txt }] }]
+                        contents: [{ parts: [{ text: "נתח את הטקסט הפיננסי הבא בעברית ותן סיכום מנהלים, נקודות מפתח ושורה תחתונה: " + txt }] }]
                     })
                 });
 
                 const data = await res.json();
                 
                 if (data.error) {
-                    out.innerHTML = "<span class='text-red-500'>שגיאה מגוגל: " + data.error.message + "</span>";
-                } else {
+                    out.innerHTML = `<span class="text-red-500 font-bold">שגיאה מגוגל:</span><br>${data.error.message}`;
+                } else if (data.candidates && data.candidates[0].content) {
                     out.innerText = data.candidates[0].content.parts[0].text;
+                } else {
+                    out.innerText = "גוגל לא החזירה תוצאה. נסה לרענן את הדף.";
                 }
             } catch (e) {
-                out.innerText = "שגיאת חיבור. וודא שאין חוסם פרסומות.";
+                out.innerText = "שגיאת חיבור. וודא שאין לך AdBlock שחוסם את גוגל.";
             } finally {
                 btn.disabled = false;
+                btnText.innerText = "נתח עכשיו";
             }
         }
     </script>
