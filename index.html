@@ -27,19 +27,19 @@
 
             btn.disabled = true;
             btnText.innerText = "מעבד נתונים...";
-            out.innerText = "מתחבר לשרתי הבינה המלאכותית...";
+            out.innerText = "מתחבר למודל Gemini Pro היציב...";
 
             const key = "AIzaSyBkcasv0YHYBMV319ZK1j2HbWMEbHOIi_o";
             
-            // שינוי לפורמט ה-URL הכי תואם שיש כרגע (v1beta עם סיומת -latest)
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
+            // שימוש במודל gemini-pro - המודל הכי נתמך בעולם
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`;
 
             try {
                 const res = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: "נתח את הטקסט הפיננסי הבא בעברית ותן סיכום מנהלים, נקודות מפתח ושורה תחתונה: " + txt }] }]
+                        contents: [{ parts: [{ text: "נתח את הטקסט הפיננסי הבא בעברית ותן סיכום מנהלים: " + txt }] }]
                     })
                 });
 
@@ -50,10 +50,10 @@
                 } else if (data.candidates && data.candidates[0].content) {
                     out.innerText = data.candidates[0].content.parts[0].text;
                 } else {
-                    out.innerText = "גוגל לא החזירה תוצאה. נסה לרענן את הדף.";
+                    out.innerText = "לא התקבלה תשובה. ייתכן והטקסט שהזנת בעייתי.";
                 }
             } catch (e) {
-                out.innerText = "שגיאת חיבור. וודא שאין לך AdBlock שחוסם את גוגל.";
+                out.innerText = "שגיאת חיבור. וודא שאין לך AdBlock.";
             } finally {
                 btn.disabled = false;
                 btnText.innerText = "נתח עכשיו";
