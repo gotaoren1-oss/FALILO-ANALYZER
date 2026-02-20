@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance AI PRO</title>
+    <title>Finance AI - Stable v1</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4">
     <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 w-full max-w-xl shadow-2xl text-right">
-        <h1 class="text-2xl font-bold text-blue-400 mb-6 font-sans">מנתח פיננסי PRO</h1>
+        <h1 class="text-2xl font-bold text-blue-400 mb-6">מנתח פיננסי PRO</h1>
         <textarea id="articleInput" class="w-full h-48 bg-black border border-slate-700 p-4 rounded-xl mb-4 text-white outline-none focus:border-blue-500" placeholder="הדבק כאן את הכתבה הפיננסית..."></textarea>
         <button onclick="run()" id="btn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all flex justify-center items-center gap-2">
             <span id="btnText">נתח עכשיו</span>
@@ -27,12 +27,12 @@
 
             btn.disabled = true;
             btnText.innerText = "מעבד נתונים...";
-            out.innerText = "מתחבר למודל Gemini Pro היציב...";
+            out.innerText = "מתחבר ל-API היציב (v1)...";
 
             const key = "AIzaSyBkcasv0YHYBMV319ZK1j2HbWMEbHOIi_o";
             
-            // שימוש במודל gemini-pro - המודל הכי נתמך בעולם
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`;
+            // עדכון לפי המלצות ה-API היציב: שימוש ב-v1 ושם מודל מפורש
+            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
 
             try {
                 const res = await fetch(url, {
@@ -46,14 +46,13 @@
                 const data = await res.json();
                 
                 if (data.error) {
-                    out.innerHTML = `<span class="text-red-500 font-bold">שגיאה מגוגל:</span><br>${data.error.message}`;
-                } else if (data.candidates && data.candidates[0].content) {
+                    // הצגת השגיאה המפורשת מגוגל לאבחון
+                    out.innerHTML = `<span class="text-red-500 font-bold">שגיאה:</span><br>${data.error.message}`;
+                } else if (data.candidates) {
                     out.innerText = data.candidates[0].content.parts[0].text;
-                } else {
-                    out.innerText = "לא התקבלה תשובה. ייתכן והטקסט שהזנת בעייתי.";
                 }
             } catch (e) {
-                out.innerText = "שגיאת חיבור. וודא שאין לך AdBlock.";
+                out.innerText = "שגיאת חיבור. וודא שאין חוסם פרסומות.";
             } finally {
                 btn.disabled = false;
                 btnText.innerText = "נתח עכשיו";
