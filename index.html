@@ -3,32 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מנתח פיננסי PRO - גרסה 2.5</title>
+    <title>מנתח פיננסי PRO - Gemini 2.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #020617; color: white; font-family: system-ui, sans-serif; }
-        .card { background: #1e293b; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .loader { width: 20px; height: 20px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
+        .card { background: #1e293b; border-radius: 20px; border: 1px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .loader { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #60a5fa; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-6 text-right">
-    <div class="card w-full max-w-2xl p-8 shadow-2xl">
-        <div class="flex items-center gap-3 mb-6">
-            <h1 class="text-3xl font-bold text-blue-400">מנתח פיננסי PRO</h1>
-            <span class="bg-green-600/20 text-green-400 border border-green-500/30 px-2 py-1 rounded text-xs font-bold tracking-wider">Gemini 2.5 Flash</span>
+    <div class="card w-full max-w-2xl p-8 transition-all">
+        <div class="flex items-center justify-between mb-8">
+            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-l from-blue-400 to-indigo-400">מנתח פיננסי PRO</h1>
+            <span class="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-1 rounded-full font-mono uppercase tracking-tighter">Engine: Gemini 2.5 Flash</span>
         </div>
         
-        <textarea id="articleInput" class="w-full h-64 bg-slate-950 border border-slate-800 p-4 rounded-xl mb-4 text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none" placeholder="הדבק כאן את הכתבה הפיננסית לניתוח עומק..."></textarea>
+        <textarea id="articleInput" class="w-full h-64 bg-slate-950/50 border border-slate-700 p-5 rounded-2xl mb-5 text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none shadow-inner" placeholder="הדבק כאן כתבה כלכלית, דוח רבעוני או ניתוח שוק..."></textarea>
         
-        <button onclick="runAnalysis()" id="btn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold flex justify-center items-center gap-3 transition-all">
+        <button onclick="runAnalysis()" id="btn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 py-4 rounded-2xl font-bold flex justify-center items-center gap-3 shadow-lg transform active:scale-[0.98] transition-all">
             <span id="btnText">נתח כתבה עכשיו</span>
             <div id="loader" class="loader"></div>
         </button>
 
-        <div id="outputContainer" class="mt-8 hidden border-t border-slate-700 pt-6">
-            <h3 class="text-xs font-bold text-slate-500 mb-4 tracking-widest uppercase">תוצאת הניתוח</h3>
-            <div id="output" class="text-sm leading-relaxed text-slate-200 whitespace-pre-wrap"></div>
+        <div id="outputContainer" class="mt-8 hidden animate-fade-in">
+            <div class="flex items-center gap-2 mb-4 text-slate-400 uppercase text-xs font-bold tracking-widest">
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                תוצאת הניתוח
+            </div>
+            <div id="output" class="text-base leading-relaxed text-slate-200 bg-slate-950/30 p-6 rounded-2xl border border-slate-800/50 whitespace-pre-wrap font-serif"></div>
         </div>
     </div>
 
@@ -41,40 +44,40 @@
             const btn = document.getElementById('btn');
             const btnText = document.getElementById('btnText');
             
-            if (!input) return alert("בבקשה תדביק טקסט כלשהו לניתוח.");
+            if (!input) return alert("השדה ריק. נא להזין טקסט לניתוח.");
 
-            // המפתח החדש והתקין שלך
+            // המפתח החדש שלך
             const API_KEY = "AIzaSyCahUCjqsHk6EybVoWUb8Ujil6CH42wwGE"; 
             
-            // השתמשנו במודל המדויק שמופיע ברשימה שלך!
+            // המודל שקיים ברשימה שלך ב-2026!
             const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
             btn.disabled = true;
             loader.style.display = 'block';
-            btnText.innerText = "מנתח נתונים (Gemini 2.5)...";
+            btnText.innerText = "מנתח נתונים ב-AI...";
             container.classList.remove('hidden');
-            output.innerText = "מתקשר עם שרתי ה-AI של גוגל...";
+            output.innerText = "מתחבר למודל Gemini 2.5 Flash...";
 
             try {
                 const response = await fetch(URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: "נתח את הטקסט הפיננסי הבא בעברית. תן סיכום מנהלים קצר, נקודות מפתח ושורה תחתונה למשקיע: " + input }] }]
+                        contents: [{ parts: [{ text: "אתה מנתח פיננסי בכיר. נתח את הטקסט הבא בעברית. תן סיכום מנהלים, 3 נקודות מפתח קריטיות, ושורה תחתונה למשקיע: " + input }] }]
                     })
                 });
 
                 const data = await response.json();
 
                 if (data.error) {
-                    output.innerHTML = `<span class="text-red-400 font-bold">שגיאה מגוגל:</span><br>${data.error.message}`;
+                    output.innerHTML = `<span class="text-red-400">שגיאה: ${data.error.message}</span>`;
                 } else if (data.candidates && data.candidates[0].content) {
                     output.innerText = data.candidates[0].content.parts[0].text;
                 } else {
-                    output.innerText = "התקבלה תשובה ריקה מגוגל. נסה שוב.";
+                    output.innerText = "גוגל לא החזירה תשובה. נסה שוב.";
                 }
             } catch (err) {
-                output.innerText = "שגיאת תקשורת. וודא שאין לך חוסם פרסומות.";
+                output.innerText = "שגיאת תקשורת. וודא שחוסם הפרסומות לא מפריע.";
             } finally {
                 btn.disabled = false;
                 loader.style.display = 'none';
