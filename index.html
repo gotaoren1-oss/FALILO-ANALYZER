@@ -3,86 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מנתח פיננסי PRO - Gemini 2.5</title>
+    <title>Finance Insight Engine - Gemini 2.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #020617; color: white; font-family: system-ui, sans-serif; }
-        .card { background: #1e293b; border-radius: 20px; border: 1px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .loader { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #60a5fa; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap');
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Assistant', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .gradient-text { background: linear-gradient(90deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .loader { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .analysis-card { transition: all 0.3s ease; }
+        .analysis-card:hover { transform: translateY(-2px); border-color: rgba(96, 165, 250, 0.4); }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6 text-right">
-    <div class="card w-full max-w-2xl p-8 transition-all">
-        <div class="flex items-center justify-between mb-8">
-            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-l from-blue-400 to-indigo-400">מנתח פיננסי PRO</h1>
-            <span class="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-1 rounded-full font-mono uppercase tracking-tighter">Engine: Gemini 2.5 Flash</span>
+<body class="min-h-screen py-10 px-4">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold gradient-text mb-2">Finance Insight Engine</h1>
+            <p class="text-slate-400">ניתוח שוק עמוק מבוסס Gemini 2.5 Flash</p>
         </div>
-        
-        <textarea id="articleInput" class="w-full h-64 bg-slate-950/50 border border-slate-700 p-5 rounded-2xl mb-5 text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none shadow-inner" placeholder="הדבק כאן כתבה כלכלית, דוח רבעוני או ניתוח שוק..."></textarea>
-        
-        <button onclick="runAnalysis()" id="btn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 py-4 rounded-2xl font-bold flex justify-center items-center gap-3 shadow-lg transform active:scale-[0.98] transition-all">
-            <span id="btnText">נתח כתבה עכשיו</span>
-            <div id="loader" class="loader"></div>
-        </button>
 
-        <div id="outputContainer" class="mt-8 hidden animate-fade-in">
-            <div class="flex items-center gap-2 mb-4 text-slate-400 uppercase text-xs font-bold tracking-widest">
-                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                תוצאת הניתוח
-            </div>
-            <div id="output" class="text-base leading-relaxed text-slate-200 bg-slate-950/30 p-6 rounded-2xl border border-slate-800/50 whitespace-pre-wrap font-serif"></div>
+        <div class="glass rounded-3xl p-6 mb-8 shadow-2xl">
+            <textarea id="articleInput" class="w-full h-48 bg-slate-900/50 border border-slate-700 p-5 rounded-2xl text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none mb-4" placeholder="הדבק כאן את הכתבה הכלכלית לניתוח מקצועי..."></textarea>
+            
+            <button onclick="runAnalysis()" id="btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl font-bold flex justify-center items-center gap-3 shadow-lg shadow-blue-900/20 transition-all active:scale-95">
+                <span id="btnText">הפעל ניתוח מומחה</span>
+                <div id="loader" class="loader"></div>
+            </button>
+        </div>
+
+        <div id="outputContainer" class="hidden animate-in fade-in duration-700">
+            <div id="outputContent" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                </div>
         </div>
     </div>
 
     <script>
         async function runAnalysis() {
             const input = document.getElementById('articleInput').value.trim();
-            const output = document.getElementById('output');
             const container = document.getElementById('outputContainer');
+            const content = document.getElementById('outputContent');
             const loader = document.getElementById('loader');
             const btn = document.getElementById('btn');
-            const btnText = document.getElementById('btnText');
             
-            if (!input) return alert("השדה ריק. נא להזין טקסט לניתוח.");
+            if (!input) return alert("נא להזין תוכן לניתוח");
 
-            // המפתח החדש שלך
             const API_KEY = "AIzaSyCahUCjqsHk6EybVoWUb8Ujil6CH42wwGE"; 
-            
-            // המודל שקיים ברשימה שלך ב-2026!
             const URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
             btn.disabled = true;
             loader.style.display = 'block';
-            btnText.innerText = "מנתח נתונים ב-AI...";
             container.classList.remove('hidden');
-            output.innerText = "מתחבר למודל Gemini 2.5 Flash...";
+            content.innerHTML = '<div class="col-span-full text-center py-10 text-blue-400 animate-pulse font-bold">סורק נתונים, בונה מודל תחזית ומעבד פרשנות...</div>';
+
+            const prompt = `
+                נתח את הטקסט הפיננסי הבא והחזר תשובה בפורמט JSON בלבד (ללא טקסט חופשי לפני או אחרי).
+                השתמש במבנה הבא:
+                {
+                  "summary": "סיכום תמציתי של הכתבה",
+                  "interpretation": "פרשנות מקצועית של המצב",
+                  "marketStatus": "הבנת מצב השוק הנוכחי לפי הכתבה",
+                  "recommendations": "המלצות פעולה למשקיע",
+                  "risks": "סכנות ואזהרות (מה יכול להשתבש)",
+                  "caution": "המלצות זהירות (ניהול סיכונים)",
+                  "insight": "נקודת מחשבה מקורית/אסטרטגית"
+                }
+                
+                הטקסט לניתוח: ${input}`;
 
             try {
                 const response = await fetch(URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: "אתה מנתח פיננסי בכיר. נתח את הטקסט הבא בעברית. תן סיכום מנהלים, 3 נקודות מפתח קריטיות, ושורה תחתונה למשקיע: " + input }] }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
 
                 const data = await response.json();
+                const rawText = data.candidates[0].content.parts[0].text;
+                
+                // ניקוי הטקסט במקרה וה-AI מוסיף ```json
+                const jsonStr = rawText.replace(/```json|```/g, "");
+                const result = JSON.parse(jsonStr);
 
-                if (data.error) {
-                    output.innerHTML = `<span class="text-red-400">שגיאה: ${data.error.message}</span>`;
-                } else if (data.candidates && data.candidates[0].content) {
-                    output.innerText = data.candidates[0].content.parts[0].text;
-                } else {
-                    output.innerText = "גוגל לא החזירה תשובה. נסה שוב.";
-                }
+                content.innerHTML = `
+                    ${createCard("סיכום מנהלים", result.summary, "fa-file-alt", "border-blue-500")}
+                    ${createCard("פרשנות מקצועית", result.interpretation, "fa-brain", "border-purple-500")}
+                    ${createCard("מצב השוק", result.marketStatus, "fa-chart-line", "border-emerald-500")}
+                    ${createCard("המלצות למשקיע", result.recommendations, "fa-lightbulb", "border-yellow-500")}
+                    ${createCard("סיכונים וסכנות", result.risks, "fa-exclamation-triangle", "border-red-500")}
+                    ${createCard("נקודת זהירות", result.caution, "fa-shield-halved", "border-orange-500")}
+                    <div class="col-span-full">
+                        ${createCard("נקודת מחשבה אסטרטגית", result.insight, "fa-chess-knight", "border-indigo-500 bg-indigo-500/5")}
+                    </div>
+                `;
+
             } catch (err) {
-                output.innerText = "שגיאת תקשורת. וודא שחוסם הפרסומות לא מפריע.";
+                content.innerHTML = '<div class="col-span-full text-red-400">אירעה שגיאה בעיבוד הנתונים. נסה שוב.</div>';
+                console.error(err);
             } finally {
                 btn.disabled = false;
                 loader.style.display = 'none';
-                btnText.innerText = "נתח כתבה עכשיו";
             }
+        }
+
+        function createCard(title, text, icon, borderClass) {
+            return `
+                <div class="glass p-5 rounded-2xl border-r-4 ${borderClass} analysis-card shadow-lg">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas ${icon} text-slate-400 text-sm"></i>
+                        <h4 class="font-bold text-slate-100 text-sm uppercase tracking-wider">${title}</h4>
+                    </div>
+                    <p class="text-slate-300 text-sm leading-relaxed">${text}</p>
+                </div>
+            `;
         }
     </script>
 </body>
